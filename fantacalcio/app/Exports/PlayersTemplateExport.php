@@ -15,7 +15,6 @@ class PlayersTemplateExport implements FromArray, WithHeadings, WithStyles
      */
     public function array(): array
     {
-        // Restituisce alcune righe di esempio per mostrare il formato
         return [
             [
                 'Mario Rossi',

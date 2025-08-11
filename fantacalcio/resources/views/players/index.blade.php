@@ -95,7 +95,7 @@
                                 @foreach($players as $player)
                                 <tr>
                                     <td>{{ $player->id }}</td>
-                                    <td><strong>{{ $player->name }}</strong></td>
+                                    <td><strong><a href="{{ route('players.show', $player->id) }}">{{ $player->name }}</a></strong></td>
                                     <td>
                                         <span class="badge 
                                             @if($player->position == 'P')bg-warning text-dark

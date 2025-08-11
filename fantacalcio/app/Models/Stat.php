@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stat extends Model
 {
+    public $incrementing = false;
+
+    protected $keyType = 'int';
+
     protected $fillable = [
+        'season',
         'id',
         'position',
         'mantra_position',
@@ -28,6 +33,7 @@ class Stat extends Model
     ];
 
     protected $casts = [
+        'season' => 'string',
         'id' => 'int',
         'position' => 'string',
         'mantra_position' => 'string',
@@ -50,6 +56,6 @@ class Stat extends Model
 
     public function player()
     {
-        return $this->belongsTo(Player::class);
+        return $this->belongsTo(Player::class, 'id', 'id');
     }
 }

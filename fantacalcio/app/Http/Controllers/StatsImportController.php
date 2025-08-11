@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\PlayersImport;
-use App\Exports\PlayersTemplateExport;
-use App\Models\Player;
+use App\Imports\StatsImport;
+use App\Exports\StatsTemplateExport;
+use App\Models\Stat;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Validators\ValidationException as ExcelValidationException;
 
-class PlayerImportController extends Controller
+class StatsImportController extends Controller
 {
     /**
      * Mostra la pagina principale dei giocatori con filtri e ordinamento
      */
     public function index(Request $request)
     {
-        $query = Player::query();
+        $query = Stat::query();
         if ($request->filled('role')) {
             $query->where('position', $request->input('role'));
         }
@@ -28,19 +28,21 @@ class PlayerImportController extends Controller
         if ($request->filled('name')) {
             $query->where('name', 'like', '%'.$request->input('name').'%');
         }
-        // Ordinamento
+        if ($request->filled('season')) {
+            $query->where('season', $request->input('season'));
+        }
         $orderable = [
-            'quotation', 'initial_quotation', 'difference',
-            'mantra_quotation', 'initial_mantra_quotation', 'mantra_difference',
-            'value', 'mantra_value'
+            'n_votes', 'average_vote', 'average_fantavote', 'goals', 'goals_conceded',
+            'catched_penalties', 'taken_penalties', 'scored_penalties', 'missed_penalties',
+            'assists', 'yellow_cards', 'red_cards', 'own_goals'
         ];
         $orderBy = $request->input('order_by');
         $orderDir = $request->input('order_dir', 'asc');
         if (in_array($orderBy, $orderable)) {
             $query->orderBy($orderBy, $orderDir === 'desc' ? 'desc' : 'asc');
         }
-        $players = $query->get();
-        return view('players.index', compact('players'));
+        $stats = $query->get();
+        return view('stats.index', compact('stats'));
     }
 
     /**
@@ -48,7 +50,7 @@ class PlayerImportController extends Controller
      */
     public function showImportForm()
     {
-        return view('players.import');
+        return view('stats.import');
     }
 
     /**
@@ -63,9 +65,10 @@ class PlayerImportController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         try {
-            $import = new PlayersImport();
+            $filename = pathinfo($request->file('file')->getClientOriginalName(), PATHINFO_FILENAME);
+            $import = new StatsImport($filename);
             Excel::import($import, $request->file('file'));
-            return redirect()->back()->with('success', 'Giocatori importati con successo!');
+            return redirect()->back()->with('success', 'Statistiche importate con successo!');
         } catch (ExcelValidationException $e) {
             $messages = [];
             foreach ($e->failures() as $failure) {
@@ -73,7 +76,7 @@ class PlayerImportController extends Controller
             }
             return redirect()->back()->with('error', 'Errori di validazione: '.implode(' | ', $messages));
         } catch (\Throwable $e) {
-            Log::error('Errore import giocatori', ['exception' => $e]);
+            Log::error('Errore import statistiche', ['exception' => $e]);
             return redirect()->back()->with('error', 'Errore durante l\'importazione: '.$e->getMessage());
         }
     }
@@ -90,11 +93,12 @@ class PlayerImportController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         try {
+            $filename = pathinfo($request->file('file')->getClientOriginalName(), PATHINFO_FILENAME);
             $path = $request->file('file')->store('temp');
-            Excel::queueImport(new PlayersImport, $path);
+            Excel::queueImport(new StatsImport($filename), $path);
             return redirect()->back()->with('success', 'Importazione avviata in background.');
         } catch (\Throwable $e) {
-            Log::error('Errore import background giocatori', ['exception' => $e]);
+            Log::error('Errore import background statistiche', ['exception' => $e]);
             return redirect()->back()->with('error', 'Errore durante l\'importazione: '.$e->getMessage());
         }
     }
@@ -104,16 +108,6 @@ class PlayerImportController extends Controller
      */
     public function exportTemplate()
     {
-        return Excel::download(new PlayersTemplateExport, 'template_giocatori.xlsx');
-    }
-
-    /**
-     * Mostra il dettaglio di un giocatore
-     */
-    public function show($id)
-    {
-        $player = \App\Models\Player::findOrFail($id);
-        $stats = $player->stats;
-        return view('players.show', compact('player', 'stats'));
+        return Excel::download(new StatsTemplateExport, 'template_stats.xlsx');
     }
 }

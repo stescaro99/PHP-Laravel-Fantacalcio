@@ -50,7 +50,7 @@ class Player extends Model
 
     public function stats()
     {
-        return $this->hasMany(Stat::class);
+        return $this->hasMany(Stat::class, 'id', 'id');
     }
 
 }
