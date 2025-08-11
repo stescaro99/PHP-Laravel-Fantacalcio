@@ -6,22 +6,40 @@ use Illuminate\Database\Eloquent\Model;
 
 class Player extends Model
 {
+    public $incrementing = false;
+
+    protected $keyType = 'int';
+
     protected $fillable = [
+        'id',
+        'position',
+        'mantra_position',
         'name',
         'team',
-        'position',
-        'age',
-        'nationality',
         'quotation',
-        'users_valuation',
-        'injury_status'
+        'initial_quotation',
+        'difference',
+        'mantra_quotation',
+        'initial_mantra_quotation',
+        'mantra_difference',
+        'value',
+        'mantra_value',
     ];
 
     protected $casts = [
-        'age' => 'int',
+        'id' => 'int',
+        'position' => 'string',
+        'mantra_position' => 'string',
+        'name' => 'string',
+        'team' => 'string',
         'quotation' => 'int',
-        'users_valuation' => 'float',
-        'injury_status' => 'float',
+        'initial_quotation' => 'int',
+        'difference' => 'int',
+        'mantra_quotation' => 'int',
+        'initial_mantra_quotation' => 'int',
+        'mantra_difference' => 'int',
+        'value' => 'int',
+        'mantra_value' => 'int',
     ];
 
 
