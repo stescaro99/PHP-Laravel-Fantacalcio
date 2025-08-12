@@ -10,6 +10,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Validators\ValidationException as ExcelValidationException;
+use Illuminate\Support\Facades\Auth;
+use App\Models\PlayerPreference;
 
 class PlayerImportController extends Controller
 {
@@ -39,8 +41,55 @@ class PlayerImportController extends Controller
         if (in_array($orderBy, $orderable)) {
             $query->orderBy($orderBy, $orderDir === 'desc' ? 'desc' : 'asc');
         }
+
+        // Filtri su preferenze dell'utente autenticato
+        if (Auth::check()) {
+            $userId = Auth::id();
+            $hasPrefFilters = $request->filled('pref_target')
+                || $request->filled('pref_quality_min')
+                || $request->filled('pref_integrity_min')
+                || $request->filled('pref_rank')
+                || $request->filled('pref_value_min')
+                || $request->filled('pref_value_max');
+
+            if ($hasPrefFilters) {
+                $query->whereHas('preferences', function ($q) use ($request, $userId) {
+                    $q->where('user_id', $userId);
+                    if ($request->filled('pref_target')) {
+                        $t = $request->input('pref_target');
+                        if ($t === '1' || $t === '0') {
+                            $q->where('is_target', $t === '1');
+                        }
+                    }
+                    if ($request->filled('pref_quality_min')) {
+                        $q->where('quality', '>=', (int) $request->input('pref_quality_min'));
+                    }
+                    if ($request->filled('pref_integrity_min')) {
+                        $q->where('integrity', '>=', (int) $request->input('pref_integrity_min'));
+                    }
+                    if ($request->filled('pref_rank')) {
+                        $q->where('rank', (int) $request->input('pref_rank'));
+                    }
+                    if ($request->filled('pref_value_min')) {
+                        $q->where('value', '>=', (int) $request->input('pref_value_min'));
+                    }
+                    if ($request->filled('pref_value_max')) {
+                        $q->where('value', '<=', (int) $request->input('pref_value_max'));
+                    }
+                });
+            }
+        }
+
         $players = $query->get();
-        return view('players.index', compact('players'));
+
+        $preferences = collect();
+        if (Auth::check() && $players->isNotEmpty()) {
+            $preferences = PlayerPreference::where('user_id', Auth::id())
+                ->whereIn('player_id', $players->pluck('id'))
+                ->get()
+                ->keyBy('player_id');
+        }
+        return view('players.index', compact('players', 'preferences'));
     }
 
     /**
@@ -114,6 +163,12 @@ class PlayerImportController extends Controller
     {
         $player = \App\Models\Player::findOrFail($id);
         $stats = $player->stats;
-        return view('players.show', compact('player', 'stats'));
+        $pref = null;
+        if (Auth::check()) {
+            $pref = PlayerPreference::where('user_id', Auth::id())
+                ->where('player_id', $player->id)
+                ->first();
+        }
+        return view('players.show', compact('player', 'stats', 'pref'));
     }
 }

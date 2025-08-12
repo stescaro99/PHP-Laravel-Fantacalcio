@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Player extends Model
 {
@@ -53,4 +55,17 @@ class Player extends Model
         return $this->hasMany(Stat::class, 'id', 'id');
     }
 
+    // Preferenze (uno-a-molti) su player_preferences
+    public function preferences(): HasMany
+    {
+        return $this->hasMany(PlayerPreference::class, 'player_id');
+    }
+
+    // Utenti (molti-a-molti) con metadati nel pivot
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'player_preferences', 'player_id', 'user_id')
+            ->withPivot(['is_target','value','integrity','quality','notes','rank'])
+            ->withTimestamps();
+    }
 }
