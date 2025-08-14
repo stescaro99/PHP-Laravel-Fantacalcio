@@ -21,13 +21,17 @@ class PlayerImportController extends Controller
     public function index(Request $request)
     {
         $query = Player::query();
-        if ($request->filled('role'))
+        $roles = array_values(array_intersect((array) $request->input('roles', []), ['P','D','C','A']));
+        if (!empty($roles))
+            $query->whereIn('position', $roles);
+        elseif ($request->filled('role'))
             $query->where('position', $request->input('role'));
         if ($request->filled('team'))
             $query->where('team', 'like', '%'.$request->input('team').'%');
         if ($request->filled('name'))
             $query->where('name', 'like', '%'.$request->input('name').'%');
         $orderable = [
+            'id','name','position','mantra_position','team',
             'quotation', 'initial_quotation', 'difference',
             'mantra_quotation', 'initial_mantra_quotation', 'mantra_difference',
             'value', 'mantra_value'
@@ -77,7 +81,9 @@ class PlayerImportController extends Controller
                 ->get()
                 ->keyBy('player_id');
         }
-        return view('players.index', compact('players', 'preferences'));
+        $allTeams = Player::query()->select('team')->distinct()->orderBy('team')->pluck('team');
+
+        return view('players.index', compact('players', 'preferences', 'allTeams'));
     }
 
     /**

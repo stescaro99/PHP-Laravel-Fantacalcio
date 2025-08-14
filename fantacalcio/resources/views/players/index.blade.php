@@ -21,135 +21,65 @@
         .rank-8 { background:#0dcaf0; }
         .rank-9 { background:#6f42c1; }
         .rank-10 { background:#343a40; }
-        /* Wider table to show all columns */
         .table-wide { min-width: 1600px; }
         .table-sm td, .table-sm th { padding: .3rem .5rem; }
         th, td { white-space: nowrap; }
-        /* Colorize select only when closed (not focused) */
-        select.select-rank:not(:focus).rank-top,
-        select.select-rank:not(:focus).rank-semitop,
-        select.select-rank:not(:focus).rank-3,
-        select.select-rank:not(:focus).rank-4,
-        select.select-rank:not(:focus).rank-5,
-        select.select-rank:not(:focus).rank-6,
-        select.select-rank:not(:focus).rank-7,
-        select.select-rank:not(:focus).rank-8,
-        select.select-rank:not(:focus).rank-9,
-        select.select-rank:not(:focus).rank-10 { color:#fff !important; }
-        select.select-rank:not(:focus).rank-top { background:#0d6efd !important; }
-        select.select-rank:not(:focus).rank-semitop { background:#20c997 !important; }
-        select.select-rank:not(:focus).rank-3 { background:#6610f2 !important; }
-        select.select-rank:not(:focus).rank-4 { background:#e83e8c !important; }
-        select.select-rank:not(:focus).rank-5 { background:#fd7e14 !important; }
-        select.select-rank:not(:focus).rank-6 { background:#198754 !important; }
-        select.select-rank:not(:focus).rank-7 { background:#dc3545 !important; }
-        select.select-rank:not(:focus).rank-8 { background:#0dcaf0 !important; }
-        select.select-rank:not(:focus).rank-9 { background:#6f42c1 !important; }
-        select.select-rank:not(:focus).rank-10 { background:#343a40 !important; }
+        .th-sort { cursor: pointer; user-select: none; }
+        .th-sort .arrow { opacity: .3; }
+        .th-sort.active.asc .arrow.up, .th-sort.active.desc .arrow.down { opacity: 1; }
+        .btn-role.active { box-shadow: inset 0 0 0 2px #00000020; }
     </style>
 </head>
 <body>
     <div class="container-fluid mt-4">
         <div class="row">
             <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2>Lista Giocatori ({{ $players->count() }} giocatori)</h2>
                     <a href="{{ route('players.import.form') }}" class="btn btn-success">Importa Giocatori</a>
                 </div>
 
                 @php
-                    // Ordinale per rank (usato sia nei filtri che nella tabella)
                     $ordinal = function($n){
                         return match($n){
                             3=>'terza',4=>'quarta',5=>'quinta',6=>'sesta',7=>'settima',8=>'ottava',9=>'nona',10=>'decima', default=>''
                         };
                     };
+                    $selectedRoles = (array) request('roles', []);
+                    $orderBy = request('order_by');
+                    $orderDir = request('order_dir', 'asc');
                 @endphp
 
-                <!-- Filtro -->
-                <form method="GET" class="mb-4 row g-2 align-items-end">
-                    <div class="col-md-3">
-                        <label for="filter_role" class="form-label">Ruolo</label>
-                        <select name="role" id="filter_role" class="form-select">
-                            <option value="">Tutti</option>
-                            <option value="P" {{ request('role') == 'P' ? 'selected' : '' }}>Portiere</option>
-                            <option value="D" {{ request('role') == 'D' ? 'selected' : '' }}>Difensore</option>
-                            <option value="C" {{ request('role') == 'C' ? 'selected' : '' }}>Centrocampista</option>
-                            <option value="A" {{ request('role') == 'A' ? 'selected' : '' }}>Attaccante</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="filter_team" class="form-label">Squadra</label>
-                        <input type="text" name="team" id="filter_team" class="form-control" value="{{ request('team') }}" placeholder="Squadra...">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="filter_name" class="form-label">Nome</label>
-                        <input type="text" name="name" id="filter_name" class="form-control" value="{{ request('name') }}" placeholder="Nome...">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="order_by" class="form-label">Ordina per</label>
-                        <select name="order_by" id="order_by" class="form-select">
-                            <option value="">--</option>
-                            <option value="quotation" {{ request('order_by') == 'quotation' ? 'selected' : '' }}>Qt. Attiva</option>
-                            <option value="initial_quotation" {{ request('order_by') == 'initial_quotation' ? 'selected' : '' }}>Qt. Iniziale</option>
-                            <option value="difference" {{ request('order_by') == 'difference' ? 'selected' : '' }}>Diff.</option>
-                            <option value="mantra_quotation" {{ request('order_by') == 'mantra_quotation' ? 'selected' : '' }}>Qt. Attiva Mantra</option>
-                            <option value="initial_mantra_quotation" {{ request('order_by') == 'initial_mantra_quotation' ? 'selected' : '' }}>Qt. Iniziale Mantra</option>
-                            <option value="mantra_difference" {{ request('order_by') == 'mantra_difference' ? 'selected' : '' }}>Diff. Mantra</option>
-                            <option value="value" {{ request('order_by') == 'value' ? 'selected' : '' }}>Valore</option>
-                            <option value="mantra_value" {{ request('order_by') == 'mantra_value' ? 'selected' : '' }}>Valore Mantra</option>
-                        </select>
-                    </div>
-                    <div class="col-md-1">
-                        <label for="order_dir" class="form-label">&nbsp;</label>
-                        <select name="order_dir" id="order_dir" class="form-select">
-                            <option value="asc" {{ request('order_dir') == 'asc' ? 'selected' : '' }}>Crescente</option>
-                            <option value="desc" {{ request('order_dir') == 'desc' ? 'selected' : '' }}>Decrescente</option>
-                        </select>
-                    </div>
-                    <div class="col-md-12"><hr class="my-3"><strong>Filtri preferenze personali</strong></div>
-                    <div class="col-md-2">
-                        <label for="pref_target" class="form-label">Solo Target</label>
-                        <select name="pref_target" id="pref_target" class="form-select">
-                            <option value="">--</option>
-                            <option value="1" {{ request('pref_target')==='1'?'selected':'' }}>Sì</option>
-                            <option value="0" {{ request('pref_target')==='0'?'selected':'' }}>No</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="pref_quality_min" class="form-label">Titolarità min</label>
-                        <input type="number" min="0" max="5" step="1" name="pref_quality_min" id="pref_quality_min" class="form-control" value="{{ request('pref_quality_min') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="pref_integrity_min" class="form-label">Integrità min</label>
-                        <input type="number" min="0" max="5" step="1" name="pref_integrity_min" id="pref_integrity_min" class="form-control" value="{{ request('pref_integrity_min') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="pref_rank" class="form-label">Rank</label>
-                        <select name="pref_rank" id="pref_rank" class="form-select">
-                            <option value="">--</option>
-                            <option value="1" {{ request('pref_rank')==='1'?'selected':'' }}>Top</option>
-                            <option value="2" {{ request('pref_rank')==='2'?'selected':'' }}>Semitop</option>
-                            @for($r=3;$r<=10;$r++)
-                                <option value="{{ $r }}" {{ request('pref_rank')===(string)$r?'selected':'' }}>{{ $ordinal($r) }} fascia</option>
-                            @endfor
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="pref_value_min" class="form-label">Val. pref min</label>
-                        <input type="number" min="0" step="1" name="pref_value_min" id="pref_value_min" class="form-control" value="{{ request('pref_value_min') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="pref_value_max" class="form-label">Val. pref max</label>
-                        <input type="number" min="0" step="1" name="pref_value_max" id="pref_value_max" class="form-control" value="{{ request('pref_value_max') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label d-none d-md-block">&nbsp;</label>
-                        <button type="submit" class="btn btn-primary w-100">Filtra</button>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label d-none d-md-block">&nbsp;</label>
-                        <a href="{{ route('players.index') }}" class="btn btn-secondary w-100">Reset</a>
+                <!-- Barra filtri rapidi -->
+                <form method="GET" id="quickFilters" class="mb-3">
+                    <div class="d-flex flex-wrap gap-2 align-items-end">
+                        <div class="input-group" style="max-width: 480px;">
+                            <span class="input-group-text">Cerca</span>
+                            <input type="text" class="form-control" name="name" placeholder="Giocatore..." value="{{ request('name') }}">
+                            <select name="team" class="form-select">
+                                <option value="">Tutte le squadre</option>
+                                @isset($allTeams)
+                                    @foreach($allTeams as $t)
+                                        <option value="{{ $t }}" {{ request('team')===$t ? 'selected' : '' }}>{{ $t }}</option>
+                                    @endforeach
+                                @endisset
+                            </select>
+                        </div>
+
+                        <div class="btn-group" role="group" aria-label="Filtra Ruoli">
+                            @php $roles = ['P'=>'Port','D'=>'Dif','C'=>'Cen','A'=>'Att']; @endphp
+                            @foreach($roles as $code=>$label)
+                                @php $active = in_array($code, $selectedRoles); @endphp
+                                <input type="checkbox" class="btn-check" id="role-{{ $code }}" autocomplete="off" name="roles[]" value="{{ $code }}" {{ $active?'checked':'' }}>
+                                <label class="btn btn-outline-primary btn-role" for="role-{{ $code }}">{{ $label }}</label>
+                            @endforeach
+                        </div>
+
+                        <input type="hidden" name="order_by" value="{{ $orderBy }}">
+                        <input type="hidden" name="order_dir" value="{{ $orderDir }}">
+
+                        <button type="submit" class="btn btn-primary">Applica</button>
+                        <a href="{{ route('players.index') }}" class="btn btn-secondary">Reset</a>
                     </div>
                 </form>
 
@@ -163,19 +93,28 @@
                         <table class="table table-striped align-middle table-sm table-wide">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Nome</th>
-                                    <th>Ruolo</th>
-                                    <th>Ruolo M</th>
-                                    <th>Squadra</th>
-                                    <th>Qt. A</th>
-                                    <th>Qt. I</th>
-                                    <th>Diff.</th>
-                                    <th>Qt. AM</th>
-                                    <th>Qt. IM</th>
-                                    <th>Diff. M</th>
-                                    <th>Valore</th>
-                                    <th>Valore M</th>
+                                    @php
+                                        $thSort = function($key, $label) use($orderBy, $orderDir) {
+                                            $isActive = $orderBy === $key;
+                                            $dir = $isActive && $orderDir === 'asc' ? 'desc' : 'asc';
+                                            $class = 'th-sort'.($isActive? ' active '.$orderDir : '');
+                                            $url = request()->fullUrlWithQuery(['order_by'=>$key,'order_dir'=>$dir]);
+                                            return "<th class=\"$class\"><a href=\"$url\" class=\"text-white text-decoration-none\">$label <span class=\"arrow up\">▲</span><span class=\"arrow down\">▼</span></a></th>";
+                                        };
+                                    @endphp
+                                    {!! $thSort('id','ID') !!}
+                                    {!! $thSort('name','Nome') !!}
+                                    {!! $thSort('position','Ruolo') !!}
+                                    {!! $thSort('mantra_position','Ruolo M') !!}
+                                    {!! $thSort('team','Squadra') !!}
+                                    {!! $thSort('quotation','Qt. A') !!}
+                                    {!! $thSort('initial_quotation','Qt. I') !!}
+                                    {!! $thSort('difference','Diff.') !!}
+                                    {!! $thSort('mantra_quotation','Qt. AM') !!}
+                                    {!! $thSort('initial_mantra_quotation','Qt. IM') !!}
+                                    {!! $thSort('mantra_difference','Diff. M') !!}
+                                    {!! $thSort('value','Valore') !!}
+                                    {!! $thSort('mantra_value','Valore M') !!}
                                     @auth
                                     <th class="text-center">Target</th>
                                     <th class="text-center">Titolarità</th>
@@ -308,7 +247,6 @@
         }
 
         if (rankSel) {
-            // Color when closed; remove color while focused (open)
             if (parseInt(rankSel.value) !== 0) applyRankClass(rankSel);
             rankSel.addEventListener('focus', () => clearRankClasses(rankSel));
             rankSel.addEventListener('blur', () => applyRankClass(rankSel));
@@ -344,6 +282,24 @@
         }
     });
     @endauth
+    </script>
+
+    <script>
+    // Evidenziazione colonna ordinata
+    (function(){
+        const params = new URLSearchParams(window.location.search);
+        const orderBy = params.get('order_by');
+        const orderDir = params.get('order_dir') || 'asc';
+        if (!orderBy) return;
+        document.querySelectorAll('thead .th-sort').forEach(th => {
+            const a = th.querySelector('a');
+            if (!a) return;
+            const href = new URL(a.getAttribute('href'), window.location);
+            if (href.searchParams.get('order_by') === orderBy) {
+                th.classList.add('active', orderDir);
+            }
+        });
+    })();
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
