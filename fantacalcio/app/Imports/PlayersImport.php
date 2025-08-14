@@ -45,8 +45,12 @@ class PlayersImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
             return null;
         }
 
-        return new Player([
-            'id' => (int)($r['Id'] ?? 0),
+        $id = (int)($r['Id'] ?? 0);
+        if ($id <= 0) {
+            return null;
+        }
+
+        $attrs = [
             'position' => (string)($r['R'] ?? '-'),
             'mantra_position' => $r['RM'] ?? null,
             'name' => (string)($r['Nome'] ?? '-'),
@@ -59,7 +63,17 @@ class PlayersImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
             'mantra_difference' => isset($r['Diff.M']) && $r['Diff.M'] !== '' ? (int)$r['Diff.M'] : null,
             'value' => (int)($r['FVM'] ?? 0),
             'mantra_value' => isset($r['FVM M']) && $r['FVM M'] !== '' ? (int)$r['FVM M'] : null,
-        ]);
+        ];
+
+        // Se esiste, aggiorna; altrimenti crea nuovo record
+        $existing = Player::find($id);
+        if ($existing) {
+            $existing->fill($attrs);
+            $existing->save();
+            return null; // Evita che Laravel-Excel provi a inserire nuovamente
+        }
+
+        return new Player(array_merge(['id' => $id], $attrs));
     }
 
     /**

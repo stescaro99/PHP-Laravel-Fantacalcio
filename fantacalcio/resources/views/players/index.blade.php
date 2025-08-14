@@ -10,17 +10,15 @@
         .star.filled { color: #f5c518; }
         .row-target { background: #fff3cd !important; font-weight: 700; }
         .rank-badge { padding: 0.25rem 0.5rem; border-radius: .25rem; color: #fff; font-weight: 600; }
-        .rank-top { background:#0d6efd; }
-        .rank-semitop { background:#20c997; }
-        .rank-0 { background:#6c757d; }
-        .rank-3 { background:#6610f2; }
-        .rank-4 { background:#e83e8c; }
-        .rank-5 { background:#fd7e14; }
-        .rank-6 { background:#198754; }
-        .rank-7 { background:#dc3545; }
-        .rank-8 { background:#0dcaf0; }
-        .rank-9 { background:#6f42c1; }
-        .rank-10 { background:#343a40; }
+        .rank-top { background:#d32f2f; color:#fff; }
+        .rank-semitop { background:#0d6efd; color:#fff; }
+        .rank-0 { background:#6c757d; color:#fff; }
+        .rank-3 { background:#198754; color:#fff; }
+        .rank-4 { background:#ffc107; color:#212529; }
+        .rank-5 { background:#C4A484; color:#212529; }
+        .rank-6 { background:#6f42c1; color:#fff; }
+        .rank-7 { background:#fd7e14; color:#212529; }
+        .rank-8 { background:#6c757d; color:#fff; }            
         .table-wide { min-width: 1600px; }
         .table-sm td, .table-sm th { padding: .3rem .5rem; }
         th, td { white-space: nowrap; }
@@ -181,9 +179,12 @@
                                             <option value="0" class="rank-0" {{ $rank==0?'selected':'' }}>-</option>
                                             <option value="1" class="rank-top" {{ $rank==1?'selected':'' }}>Top</option>
                                             <option value="2" class="rank-semitop" {{ $rank==2?'selected':'' }}>Semitop</option>
-                                            @for($r=3;$r<=10;$r++)
+                                            @for($r=3;$r<=5;$r++)
                                                 <option value="{{ $r }}" class="rank-{{ $r }}" {{ $rank==$r?'selected':'' }}>{{ $ordinal($r) }} fascia</option>
                                             @endfor
+                                            <option value="6" class="rank-6" {{ $rank==6?'selected':'' }}>Scommessa</option>
+                                            <option value="7" class="rank-7" {{ $rank==7?'selected':'' }}>Per coppia</option>
+                                            <option value="8" class="rank-8" {{ $rank==8?'selected':'' }}>Riserva</option>
                                         </select>
                                     </td>
                                     @endauth
@@ -202,11 +203,11 @@
     function rankClassFor(val){
         if(val===1) return 'rank-top';
         if(val===2) return 'rank-semitop';
-        if(val>=3 && val<=10) return 'rank-'+val;
+        if(val>=3 && val<=8) return 'rank-'+val;
         return null;
     }
     function clearRankClasses(el){
-        ['rank-top','rank-semitop','rank-3','rank-4','rank-5','rank-6','rank-7','rank-8','rank-9','rank-10'].forEach(c=>el.classList.remove(c));
+        ['rank-top','rank-semitop','rank-3','rank-4','rank-5','rank-6','rank-7','rank-8'].forEach(c=>el.classList.remove(c));
     }
     function applyRankClass(el){
         clearRankClasses(el);
