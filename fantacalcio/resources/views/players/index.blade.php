@@ -117,7 +117,7 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label for="pref_quality_min" class="form-label">Qualità min</label>
+                        <label for="pref_quality_min" class="form-label">Titolarità min</label>
                         <input type="number" min="0" max="5" step="1" name="pref_quality_min" id="pref_quality_min" class="form-control" value="{{ request('pref_quality_min') }}">
                     </div>
                     <div class="col-md-2">
@@ -178,7 +178,7 @@
                                     <th>Valore M</th>
                                     @auth
                                     <th class="text-center">Target</th>
-                                    <th class="text-center">Qualità</th>
+                                    <th class="text-center">Titolarità</th>
                                     <th class="text-center">Integrità</th>
                                     <th class="text-center">Val. pref</th>
                                     <th class="text-center">Rank</th>

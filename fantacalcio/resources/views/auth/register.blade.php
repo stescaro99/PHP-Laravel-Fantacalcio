@@ -29,7 +29,6 @@
       <div class="mb-3">
         <label class="form-label">Conferma Password</label>
         <input type="password" name="password_confirmation" class="form-control" required>
-        @error('password_confirmation')<div class="text-danger small">{{ $message }}</div>@enderror
       </div>
       <button class="btn btn-primary w-100" type="submit">Registrati</button>
     </form>

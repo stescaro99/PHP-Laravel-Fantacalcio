@@ -52,27 +52,33 @@ class StatsImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmpty
             return null;
         }
 
-        return new Stat([
-            'id' => (int)($r['Id'] ?? 0),
+        $attrs = [
+            'player_id' => (int)($r['Id'] ?? 0),
             'position' => (string)($r['R'] ?? '-'),
             'mantra_position' => $r['RM'] ?? null,
             'name' => (string)($r['Nome'] ?? '-'),
             'team' => (string)($r['Squadra'] ?? '-'),
-			'n_votes' => (int)($r['Pv'] ?? 0),
-			'average_vote' => (float)($r['Mv'] ?? 0.0),
-			'average_fantavote' => (float)($r['Fm'] ?? 0.0),
-			'goals' => (int)($r['Gf'] ?? 0),
-			'goals_conceded' => (int)($r['Gs'] ?? 0),
-			'catched_penalties' => (int)($r['Rp'] ?? 0),
-			'taken_penalties' => (int)($r['Rc'] ?? 0),
-			'scored_penalties' => (int)($r['R+'] ?? 0),
-			'missed_penalties' => (int)($r['R-'] ?? 0),
-			'assists' => (int)($r['Ass'] ?? 0),
-			'yellow_cards' => (int)($r['Amm'] ?? 0),
-			'red_cards' => (int)($r['Esp'] ?? 0),
-			'own_goals' => (int)($r['Au'] ?? 0),
-			'season' => $this->season,
-        ]);
+            'n_votes' => (int)($r['Pv'] ?? 0),
+            'average_vote' => (float)($r['Mv'] ?? 0.0),
+            'average_fantavote' => (float)($r['Fm'] ?? 0.0),
+            'goals' => (int)($r['Gf'] ?? 0),
+            'goals_conceded' => (int)($r['Gs'] ?? 0),
+            'catched_penalties' => (int)($r['Rp'] ?? 0),
+            'taken_penalties' => (int)($r['Rc'] ?? 0),
+            'scored_penalties' => (int)($r['R+'] ?? 0),
+            'missed_penalties' => (int)($r['R-'] ?? 0),
+            'assists' => (int)($r['Ass'] ?? 0),
+            'yellow_cards' => (int)($r['Amm'] ?? 0),
+            'red_cards' => (int)($r['Esp'] ?? 0),
+            'own_goals' => (int)($r['Au'] ?? 0),
+            'season' => $this->season,
+        ];
+
+        // Upsert per evitare duplicati della stessa season per lo stesso player
+        return Stat::updateOrCreate(
+            ['player_id' => $attrs['player_id'], 'season' => $this->season],
+            $attrs
+        );
     }
 
     /**

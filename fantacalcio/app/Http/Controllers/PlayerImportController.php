@@ -21,16 +21,12 @@ class PlayerImportController extends Controller
     public function index(Request $request)
     {
         $query = Player::query();
-        if ($request->filled('role')) {
+        if ($request->filled('role'))
             $query->where('position', $request->input('role'));
-        }
-        if ($request->filled('team')) {
+        if ($request->filled('team'))
             $query->where('team', 'like', '%'.$request->input('team').'%');
-        }
-        if ($request->filled('name')) {
+        if ($request->filled('name'))
             $query->where('name', 'like', '%'.$request->input('name').'%');
-        }
-        // Ordinamento
         $orderable = [
             'quotation', 'initial_quotation', 'difference',
             'mantra_quotation', 'initial_mantra_quotation', 'mantra_difference',
@@ -38,12 +34,10 @@ class PlayerImportController extends Controller
         ];
         $orderBy = $request->input('order_by');
         $orderDir = $request->input('order_dir', 'asc');
-        if (in_array($orderBy, $orderable)) {
+        if (in_array($orderBy, $orderable))
             $query->orderBy($orderBy, $orderDir === 'desc' ? 'desc' : 'asc');
-        }
-
-        // Filtri su preferenze dell'utente autenticato
-        if (Auth::check()) {
+        if (Auth::check())
+        {
             $userId = Auth::id();
             $hasPrefFilters = $request->filled('pref_target')
                 || $request->filled('pref_quality_min')
@@ -52,38 +46,32 @@ class PlayerImportController extends Controller
                 || $request->filled('pref_value_min')
                 || $request->filled('pref_value_max');
 
-            if ($hasPrefFilters) {
+            if ($hasPrefFilters)
                 $query->whereHas('preferences', function ($q) use ($request, $userId) {
                     $q->where('user_id', $userId);
-                    if ($request->filled('pref_target')) {
+                    if ($request->filled('pref_target'))
+                    {
                         $t = $request->input('pref_target');
-                        if ($t === '1' || $t === '0') {
+                        if ($t === '1' || $t === '0')
                             $q->where('is_target', $t === '1');
-                        }
                     }
-                    if ($request->filled('pref_quality_min')) {
+                    if ($request->filled('pref_quality_min'))
                         $q->where('quality', '>=', (int) $request->input('pref_quality_min'));
-                    }
-                    if ($request->filled('pref_integrity_min')) {
+                    if ($request->filled('pref_integrity_min'))
                         $q->where('integrity', '>=', (int) $request->input('pref_integrity_min'));
-                    }
-                    if ($request->filled('pref_rank')) {
+                    if ($request->filled('pref_rank'))
                         $q->where('rank', (int) $request->input('pref_rank'));
-                    }
-                    if ($request->filled('pref_value_min')) {
+                    if ($request->filled('pref_value_min'))
                         $q->where('value', '>=', (int) $request->input('pref_value_min'));
-                    }
-                    if ($request->filled('pref_value_max')) {
+                    if ($request->filled('pref_value_max'))
                         $q->where('value', '<=', (int) $request->input('pref_value_max'));
-                    }
                 });
-            }
         }
-
         $players = $query->get();
-
         $preferences = collect();
-        if (Auth::check() && $players->isNotEmpty()) {
+
+        if (Auth::check() && $players->isNotEmpty())
+        {
             $preferences = PlayerPreference::where('user_id', Auth::id())
                 ->whereIn('player_id', $players->pluck('id'))
                 ->get()
@@ -108,20 +96,23 @@ class PlayerImportController extends Controller
         $validator = Validator::make($request->all(), [
             'file' => 'required|file|mimes:xlsx,xls,csv|max:2048'
         ]);
-        if ($validator->fails()) {
+        if ($validator->fails())
             return redirect()->back()->withErrors($validator)->withInput();
-        }
-        try {
+        try
+        {
             $import = new PlayersImport();
             Excel::import($import, $request->file('file'));
             return redirect()->back()->with('success', 'Giocatori importati con successo!');
-        } catch (ExcelValidationException $e) {
+        }
+        catch (ExcelValidationException $e)
+        {
             $messages = [];
-            foreach ($e->failures() as $failure) {
+            foreach ($e->failures() as $failure)
                 $messages[] = 'Riga '.$failure->row().' (colonna '.$failure->attribute().'): '.implode('; ', $failure->errors());
-            }
             return redirect()->back()->with('error', 'Errori di validazione: '.implode(' | ', $messages));
-        } catch (\Throwable $e) {
+        } 
+        catch (\Throwable $e)
+        {
             Log::error('Errore import giocatori', ['exception' => $e]);
             return redirect()->back()->with('error', 'Errore durante l\'importazione: '.$e->getMessage());
         }
@@ -135,14 +126,16 @@ class PlayerImportController extends Controller
         $validator = Validator::make($request->all(), [
             'file' => 'required|file|mimes:xlsx,xls,csv|max:5120'
         ]);
-        if ($validator->fails()) {
+        if ($validator->fails())
             return redirect()->back()->withErrors($validator)->withInput();
-        }
-        try {
+        try
+        {
             $path = $request->file('file')->store('temp');
             Excel::queueImport(new PlayersImport, $path);
             return redirect()->back()->with('success', 'Importazione avviata in background.');
-        } catch (\Throwable $e) {
+        }
+        catch (\Throwable $e)
+        {
             Log::error('Errore import background giocatori', ['exception' => $e]);
             return redirect()->back()->with('error', 'Errore durante l\'importazione: '.$e->getMessage());
         }
@@ -162,9 +155,13 @@ class PlayerImportController extends Controller
     public function show($id)
     {
         $player = \App\Models\Player::findOrFail($id);
-        $stats = $player->stats;
+        $stats = $player->stats()
+            ->orderByRaw("CAST(substr(season, 1, instr(season, '-') - 1) AS INTEGER) DESC")
+            ->orderBy('season', 'desc')
+            ->get();
         $pref = null;
-        if (Auth::check()) {
+        if (Auth::check())
+        {
             $pref = PlayerPreference::where('user_id', Auth::id())
                 ->where('player_id', $player->id)
                 ->first();

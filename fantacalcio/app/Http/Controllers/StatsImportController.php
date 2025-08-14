@@ -19,28 +19,25 @@ class StatsImportController extends Controller
     public function index(Request $request)
     {
         $query = Stat::query();
-        if ($request->filled('role')) {
+        if ($request->filled('role'))
             $query->where('position', $request->input('role'));
-        }
-        if ($request->filled('team')) {
+        if ($request->filled('team'))
             $query->where('team', 'like', '%'.$request->input('team').'%');
-        }
-        if ($request->filled('name')) {
+        if ($request->filled('name'))
             $query->where('name', 'like', '%'.$request->input('name').'%');
-        }
-        if ($request->filled('season')) {
+        if ($request->filled('season'))
             $query->where('season', $request->input('season'));
-        }
         $orderable = [
             'n_votes', 'average_vote', 'average_fantavote', 'goals', 'goals_conceded',
             'catched_penalties', 'taken_penalties', 'scored_penalties', 'missed_penalties',
             'assists', 'yellow_cards', 'red_cards', 'own_goals'
         ];
         $orderBy = $request->input('order_by');
-        $orderDir = $request->input('order_dir', 'asc');
-        if (in_array($orderBy, $orderable)) {
+        $orderDir = $request->input('order_dir', 'desc');
+        $query->orderBy('season', 'desc');
+
+        if (in_array($orderBy, $orderable))
             $query->orderBy($orderBy, $orderDir === 'desc' ? 'desc' : 'asc');
-        }
         $stats = $query->get();
         return view('stats.index', compact('stats'));
     }

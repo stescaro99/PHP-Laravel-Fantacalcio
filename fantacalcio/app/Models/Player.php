@@ -50,9 +50,9 @@ class Player extends Model
         'updated_at',
     ];
 
-    public function stats()
+    public function stats(): HasMany
     {
-        return $this->hasMany(Stat::class, 'id', 'id');
+        return $this->hasMany(Stat::class, 'player_id', 'id');
     }
 
     // Preferenze (uno-a-molti) su player_preferences

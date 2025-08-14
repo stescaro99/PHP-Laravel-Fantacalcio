@@ -8,7 +8,6 @@
     <style>
         .star { color: #ddd; cursor: pointer; }
         .star.filled { color: #f5c518; }
-        /* Colorize select only after choice */
         select.select-rank.rank-top,
         select.select-rank.rank-semitop,
         select.select-rank.rank-3,
@@ -48,6 +47,56 @@
             <li class="list-group-item"><strong>Valore Mantra:</strong> {{ $player->mantra_value }}</li>
         </ul>
 
+        <h4>Statistiche</h4>
+        @if($stats->isEmpty())
+            <div class="alert alert-warning">Nessuna statistica disponibile per questo giocatore.</div>
+        @else
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Stagione</th>
+                            <th>Squadra</th>
+                            <th>Presenze</th>
+                            <th>MV</th>
+                            <th>FM</th>
+                            <th>Gol</th>
+                            <th>Gol subiti</th>
+                            <th>Rig. parati</th>
+                            <th>Rig. causati</th>
+                            <th>Rig. segnati</th>
+                            <th>Rig. sbagliati</th>
+                            <th>Assist</th>
+                            <th>Ammonizioni</th>
+                            <th>Espulsioni</th>
+                            <th>Autogol</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($stats as $stat)
+                        <tr>
+                            <td>{{ $stat->season }}</td>
+                            <td>{{ $stat->team }}</td>
+                            <td>{{ $stat->n_votes }}</td>
+                            <td>{{ $stat->average_vote }}</td>
+                            <td>{{ $stat->average_fantavote }}</td>
+                            <td>{{ $stat->goals }}</td>
+                            <td>{{ $stat->goals_conceded }}</td>
+                            <td>{{ $stat->catched_penalties }}</td>
+                            <td>{{ $stat->taken_penalties }}</td>
+                            <td>{{ $stat->scored_penalties }}</td>
+                            <td>{{ $stat->missed_penalties }}</td>
+                            <td>{{ $stat->assists }}</td>
+                            <td>{{ $stat->yellow_cards }}</td>
+                            <td>{{ $stat->red_cards }}</td>
+                            <td>{{ $stat->own_goals }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+
         @auth
         <div class="card mb-4">
             <div class="card-header">Preferenze personali</div>
@@ -57,7 +106,7 @@
                     <label for="is_target" class="form-check-label">Target</label>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Qualità</label><br>
+                    <label class="form-label">Titolarità</label><br>
                     @for($i=1;$i<=5;$i++)
                         <span class="star js-quality {{ ($pref && ($pref->quality ?? 0) >= $i) ? 'filled' : '' }}" data-value="{{ $i }}">★</span>
                     @endfor
@@ -87,54 +136,6 @@
             </div>
         </div>
         @endauth
-
-        <h4>Statistiche</h4>
-        @if($stats->isEmpty())
-            <div class="alert alert-warning">Nessuna statistica disponibile per questo giocatore.</div>
-        @else
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Stagione</th>
-                            <th>Presenze</th>
-                            <th>MV</th>
-                            <th>FM</th>
-                            <th>Gol</th>
-                            <th>Gol subiti</th>
-                            <th>Rig. parati</th>
-                            <th>Rig. causati</th>
-                            <th>Rig. segnati</th>
-                            <th>Rig. sbagliati</th>
-                            <th>Assist</th>
-                            <th>Ammonizioni</th>
-                            <th>Espulsioni</th>
-                            <th>Autogol</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($stats as $stat)
-                        <tr>
-                            <td>{{ $stat->season }}</td>
-                            <td>{{ $stat->n_votes }}</td>
-                            <td>{{ $stat->average_vote }}</td>
-                            <td>{{ $stat->average_fantavote }}</td>
-                            <td>{{ $stat->goals }}</td>
-                            <td>{{ $stat->goals_conceded }}</td>
-                            <td>{{ $stat->catched_penalties }}</td>
-                            <td>{{ $stat->taken_penalties }}</td>
-                            <td>{{ $stat->scored_penalties }}</td>
-                            <td>{{ $stat->missed_penalties }}</td>
-                            <td>{{ $stat->assists }}</td>
-                            <td>{{ $stat->yellow_cards }}</td>
-                            <td>{{ $stat->red_cards }}</td>
-                            <td>{{ $stat->own_goals }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
     </div>
 
     @auth

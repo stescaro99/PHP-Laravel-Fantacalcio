@@ -9,7 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('stats', function (Blueprint $table) {
-            $table->integer('id')->primary(); // stesso id del player
+            $table->increments('id');
+            $table->integer('player_id');
             $table->string('position');
             $table->string('mantra_position')->nullable();
             $table->string('name');
@@ -29,6 +30,10 @@ return new class extends Migration
             $table->integer('own_goals');
             $table->string('season');
             $table->timestamps();
+
+            $table->unique(['player_id', 'season']);
+            // Se vuoi anche la FK (su SQLite potrebbe non applicarsi):
+            // $table->foreign('player_id')->references('id')->on('players')->onDelete('cascade');
         });
     }
 
