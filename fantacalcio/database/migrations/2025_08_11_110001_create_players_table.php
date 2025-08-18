@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('players', function (Blueprint $table) {
-            $table->integer('id')->primary(); // id manuale
+            $table->integer('id')->primary();
             $table->string('position');
             $table->string('mantra_position')->nullable();
             $table->string('name');

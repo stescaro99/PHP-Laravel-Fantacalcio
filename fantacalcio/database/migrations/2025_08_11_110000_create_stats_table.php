@@ -32,8 +32,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['player_id', 'season']);
-            // Se vuoi anche la FK (su SQLite potrebbe non applicarsi):
-            // $table->foreign('player_id')->references('id')->on('players')->onDelete('cascade');
         });
     }
 
