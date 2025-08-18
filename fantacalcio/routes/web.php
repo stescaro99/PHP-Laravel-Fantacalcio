@@ -5,6 +5,7 @@ use App\Http\Controllers\PlayerImportController;
 use App\Http\Controllers\StatsImportController;
 use App\Http\Controllers\PlayerPreferenceController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FantaTeamController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,10 +31,20 @@ Route::post('/stats/import', [StatsImportController::class, 'import'])->name('st
 Route::post('/stats/import-background', [StatsImportController::class, 'importInBackground'])->name('stats.import.background');
 Route::get('/stats/template', [StatsImportController::class, 'exportTemplate'])->name('stats.export.template');
 
-// Player Preferences API (temporanea, semplice JSON)
 Route::middleware('auth')->group(function () {
     Route::get('/player-preferences', [PlayerPreferenceController::class, 'index'])->name('player_prefs.index');
     Route::post('/player-preferences/upsert', [PlayerPreferenceController::class, 'upsert'])->name('player_prefs.upsert');
     Route::delete('/player-preferences/remove', [PlayerPreferenceController::class, 'remove'])->name('player_prefs.remove');
     Route::get('/player-preferences/get', [PlayerPreferenceController::class, 'get'])->name('player_prefs.get');
+
+    // Team pages
+    Route::get('/team', [FantaTeamController::class, 'index'])->name('team.index');
+    Route::get('/team/create', [FantaTeamController::class, 'builder'])->name('team.create');
+    Route::get('/team/{id}/edit', [FantaTeamController::class, 'builder'])->name('team.edit');
+
+    // Team builder API
+    Route::get('/team/builder', [FantaTeamController::class, 'builder'])->name('team.builder');
+    Route::get('/team/search', [FantaTeamController::class, 'searchPlayers'])->name('team.search');
+    Route::get('/team/players-by-ids', [FantaTeamController::class, 'playersByIds'])->name('team.playersByIds');
+    Route::post('/team/save', [FantaTeamController::class, 'save'])->name('team.save');
 });

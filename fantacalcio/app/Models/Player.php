@@ -68,4 +68,10 @@ class Player extends Model
             ->withPivot(['is_target','value','integrity','quality','notes','rank'])
             ->withTimestamps();
     }
+
+    // Relazione many-to-many con i FantaTeam tramite pivot fanta_team_player
+    public function fantaTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(FantaTeam::class, 'fanta_team_player', 'player_id', 'fanta_team_id')->withTimestamps();
+    }
 }

@@ -68,6 +68,12 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    // FantaTeam dell'utente
+    public function fantaTeams(): HasMany
+    {
+        return $this->hasMany(FantaTeam::class, 'user_id');
+    }
+
     public function upsertPlayerPreference(int $playerId, array $attrs = []): PlayerPreference
     {
         return PlayerPreference::updateOrCreate(

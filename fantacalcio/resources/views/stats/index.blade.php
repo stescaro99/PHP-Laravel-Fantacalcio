@@ -7,6 +7,33 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+    <!-- App Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url('/') }}">Home</a>
+        <div class="navbar-nav">
+          <a class="nav-link" href="{{ route('players.index') }}">Giocatori</a>
+          <a class="nav-link active" aria-current="page" href="{{ route('stats.index') }}">Statistiche</a>
+          @auth
+            <a class="nav-link" href="{{ route('team.builder') }}">Team Builder</a>
+          @endauth
+          <a class="nav-link" href="{{ route('players.import.form') }}">Import Giocatori</a>
+          <a class="nav-link" href="{{ route('stats.import.form') }}">Import Statistiche</a>
+        </div>
+        <div class="ms-auto navbar-nav">
+          @auth
+            <form method="POST" action="{{ route('logout') }}" class="d-inline">
+              @csrf
+              <button type="submit" class="btn btn-link nav-link p-0">Logout</button>
+            </form>
+          @else
+            <a class="nav-link" href="{{ route('login') }}">Login</a>
+            <a class="nav-link" href="{{ route('register') }}">Register</a>
+          @endauth
+        </div>
+      </div>
+    </nav>
+
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Statistiche Giocatori</h2>
